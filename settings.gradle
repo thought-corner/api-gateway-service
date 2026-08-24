@@ -1,0 +1,8 @@
+rootProject.name = 'api-gateway-service'
+
+include 'service-discovery'
+include 'gateway-common'
+include 'apigateway-webflux'
+include 'apigateway-webmvc'
+include 'alpha-service'
+include 'beta-service'
