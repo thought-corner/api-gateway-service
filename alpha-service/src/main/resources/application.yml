@@ -1,0 +1,21 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: alpha-service
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+    prefer-ip-address: true
+
+# 게이트웨이의 jwt.secret 과 같은 값이어야 한다 (HS256, 32자 이상)
+jwt:
+  secret: api-gateway-jwt-secret-key-for-hs256-change-me-in-prod
+  expiration: 24h
