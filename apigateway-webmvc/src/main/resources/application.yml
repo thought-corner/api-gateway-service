@@ -1,0 +1,35 @@
+server:
+  port: 8010
+
+spring:
+  application:
+    name: apigateway-webmvc
+
+# 라우트는 GatewayRoutesConfig 의 Java DSL 로 정의한다.
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+    prefer-ip-address: true
+
+# GlobalLoggingFilter 설정. 생략하면 GatewayLoggingProperties 의 기본값이 쓰인다.
+gateway:
+  logging:
+    base-message: Spring Cloud Gateway MVC Global Filter
+    pre-logger: true
+    post-logger: true
+
+# alpha-service 의 jwt.secret 과 같은 값이어야 한다 (HS256, 32자 이상)
+jwt:
+  secret: api-gateway-jwt-secret-key-for-hs256-change-me-in-prod
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, beans, metrics, prometheus, refresh
