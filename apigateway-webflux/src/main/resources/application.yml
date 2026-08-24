@@ -1,0 +1,68 @@
+server:
+  port: 8000
+
+spring:
+  application:
+    name: apigateway-webflux
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            # JWT 가 필요한 경로. 더 구체적인 경로이므로 반드시 위에 둔다.
+            - id: alpha-service-secure
+              uri: lb://ALPHA-SERVICE
+              predicates:
+                - Path=/alpha-service/secure/**
+              filters:
+                - RemoveRequestHeader=Cookie
+                - AuthorizationHeader
+
+            - id: alpha-service
+              uri: lb://ALPHA-SERVICE
+              predicates:
+                - Path=/alpha-service/**
+              filters:
+                - AddRequestHeader=alpha-request, alpha-request-header
+                - AddResponseHeader=alpha-response, alpha-response-header
+                - RequestLogging=Alpha route
+
+            - id: beta-service
+              uri: lb://BETA-SERVICE
+              predicates:
+                - Path=/beta-service/**
+              filters:
+                - AddRequestHeader=beta-request, beta-request-header
+                - AddResponseHeader=beta-response, beta-response-header
+                - name: RequestLogging
+                  args:
+                    base-message: Beta route
+                    pre-logger: true
+                    post-logger: true
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    instance-id: ${spring.application.name}:${spring.cloud.client.ip-address}:${server.port}
+    prefer-ip-address: true
+
+# GlobalLoggingFilter 설정. 생략하면 GatewayLoggingProperties 의 기본값이 쓰인다.
+gateway:
+  logging:
+    base-message: Spring Cloud Gateway Global Filter
+    pre-logger: true
+    post-logger: true
+
+# alpha-service 의 jwt.secret 과 같은 값이어야 한다 (HS256, 32자 이상)
+jwt:
+  secret: api-gateway-jwt-secret-key-for-hs256-change-me-in-prod
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, beans, metrics, prometheus, refresh
